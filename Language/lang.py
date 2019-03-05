@@ -116,5 +116,113 @@ class step:
 			e = step(e)
 			return e
 
-
 		assert False
+
+"""
+Adding Untyped Lambda Calculus
+
+"""
+class IdExpr(Expr):
+	def __int__(self, id):
+		self.id = id
+		self.ref = None
+
+
+	def __str__(self):
+		return self.id
+
+class VarDecl:
+  def __init__(self, id):
+    self.id = id
+
+  def __str__(self):
+    return self.id
+
+class AbsExpr(Expr):
+  def __init__(self, var, e1):
+    if type(var) is str:
+      self.var = VarDecl(var)
+    else:
+      self.var = var
+    self.expr = e1
+
+  def __str__(self):
+    return f"\\{self.var}.{self.expr}"
+
+class AppExpr(Expr):
+
+  def __init__(self, lhs, rhs):
+    self.lhs = lhs
+    self.rhs = rhs
+
+  def __str__(self):
+    return f"({self.lhs} {self.rhs})"
+
+def is_value(e):
+  return type(e) in (IdExpr, AbsExpr)
+
+def is_reducible(e):
+  return not is_value(e)
+
+def resolve(e, scope = []):
+  if type(e) is AppExpr:
+    resolve(e.lhs, scope)
+    resolve(e.rhs, scope)
+    return
+
+  if type(e) is AbsExpr:
+    
+    resolve(e.expr, scope + [e.var])
+    return
+
+  if type(e) is IdExpr:
+    for var in reversed(scope):
+      if e.id == var.id:
+        e.ref = var 
+        return
+    raise Exception("name lookup error")
+
+ 
+  assert False
+
+def subst(e, s):
+  
+  if type(e) is IdExpr:
+    else:
+      return e
+
+  if type(e) is AbsExpr:
+    return AbsExpr(e.var, subst(e.expr, s))
+
+  if type(e) is AppExpr:
+    return AppExpr(subst(e.lhs, s), subst(e.rhs, s))
+
+  assert False
+
+def step_app(e):
+ 
+  if is_reducible(e.lhs): 
+    return AppExpr(step(e.lhs), e.rhs)
+
+  if type(e.lhs) is not AbsExpr:
+    raise Exception("application of non-lambda")
+
+  if is_reducible(e.rhs): 
+    return AppExpr(e.lhs, step(e.rhs))
+
+  s = {
+    e.lhs.var: e.rhs
+  }
+  return subst(e.lhs.expr, s);
+
+def step(e):
+  assert isinstance(e, Expr)
+  assert is_reducible(e)
+
+  if type(e) is AppExpr:
+    return step_app(e)
+
+  assert False
+
+
+
