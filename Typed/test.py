@@ -1,24 +1,11 @@
 from lang import *
 
-# e = (3 + 5) == (11 - 3)
-e = \
-  EqExpr(
-    AddExpr(3, 5),
-    SubExpr(11, 5)
-  )
+impl = \
+  LambdaExpr([VarDecl("p", boolType), VarDecl("q", boolType)], OrExpr(NotExpr("p"), "q"))
 
-print(e)
-print(check(e))
-# reduce(e)
-print(evaluate(e))
-
-try:
-  e2 = \
-    EqExpr(
-      AddExpr(3, 5),
-      SubExpr(11, True) # nope
-    )
-  print(e2)
-  check(e2)
-except Exception as err:
-  print(f"error: {err}")
+table = [
+  resolve(CallExpr(clone(impl), [True, True])),
+  resolve(CallExpr(clone(impl), [True, False])),
+  resolve(CallExpr(clone(impl), [False, True])),
+  resolve(CallExpr(clone(impl), [False, False]))
+]

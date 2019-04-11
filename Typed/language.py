@@ -1,311 +1,304 @@
 class Type:
   # Represents a type in the language.
   #
-  # T ::= Bool | Int
+  # T ::= Bool                     -- type of bools
+  #       Int                      -- type of ints
+  #       T1 -> T2                 -- type of abstractions
+  #       (T1, T2, ..., Tn) -> T0  -- type of lambdas
   pass
 
 class BoolType(Type):
-  # Represents the type 'Bool'
   def __str__(self):
     return "Bool"
 
 class IntType(Type):
-  # Represents the type 'Int'
   def __str__(self):
     return "Int"
 
-class Expr:
-  # Represents the set of expressions in the
-  # pure (or untyped) lambda calculus. This is
-  # defined as:
-  #
-  #   e ::= b                     -- boolean literals (true and false)
-  #         e1 and e2             -- logical and
-  #         e1 or e2              -- logical or
-  #         not e1                -- logical negation
-  #         if e1 then e2 else e3 -- conditionals
-  #         n                     -- integer literals
-  #         e1 + e2               -- addition
-  #         e1 - e2               -- subtraction
-  #         e1 * e2               -- multiplication
-  #         e1 / e2               -- quotient of division
-  #         e1 % e2               -- remainder of division
-  #         -e1                   -- negation
-  #         e1 == e2              -- equality
-  #         e1 != e2              -- distinction
-  #         e1 < e2               -- less than
-  #         e1 > e2               -- greater than
-  #         e1 <= e2              -- less than or equal to
-  #         e1 >= e2              -- greater than or equal to
-  def __init__(self):
-    # The type of the expression. This is computed 
-    # by the check() function.
-    self.type = None
+class ArrowType(Type):
+  def __init__(self, t1, t2):
+    self.parm = t1
+    self.ret = t2
+  
+  def __str__(self):
+    return f"({self.lhs} -> {self.rhs}"
 
-## Boolean expressions
+class FnType(Type):
+  def __init__(self, parms, ret):
+    self.parms = parms
+    self.ret = ret
+
+boolType = BoolType()
+
+intType = IntType()
+
+
+class Expr:
+
+  pass
 
 class BoolExpr(Expr):
   def __init__(self, val):
-    Expr.__init__(self)
-    self.value = val
+    self.val = val
 
   def __str__(self):
-    return "true" if self.value else "false"
+    return "true" if self.val else "false"
 
 class AndExpr(Expr):
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+  def __init__(self, e1, e2):
+    self.lhs = expr(e1)
+    self.rhs = expr(e2)
 
   def __str__(self):
     return f"({self.lhs} and {self.rhs})"
 
 class OrExpr(Expr):
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+  def __init__(self, e1, e2):
+    self.lhs = expr(e1)
+    self.rhs = expr(e2)
 
   def __str__(self):
     return f"({self.lhs} or {self.rhs})"
 
 class NotExpr(Expr):
-  def __init__(self, e):
-    Expr.__init__(self)
-    self.expr = expr(e)
+  def __init__(self, e1):
+    self.expr = expr(e1)
 
   def __str__(self):
     return f"(not {self.expr})"
 
 class IfExpr(Expr):
-  # Represents expressions of the form `if e1 then e2 else e3`.
   def __init__(self, e1, e2, e3):
-    Expr.__init__(self)
-    self.cond = express(e1)
-    self.true = express(e2)
-    self.false = express(e3)
+    self.cond = expr(e1)
+    self.true = expr(e2)
+    self.false = expr(e3)
 
   def __str__(self):
     return f"(if {self.cond} then {self.true} else {self.false})"
 
-## Integer expressions
-
-class IntExpr(Expr):
-  # Represents numeric literals.
-  def __init__(self, val):
-    Expr.__init__(self)
-    self.value = val
-
-  def __str__(self):
-    return str(self.value)
-
-class AddExpr(Expr):
-  # Represents expressions of the form `e1 + e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+class IdExpr(Expr):
+  def __init__(self, x):
+    if type(x) is str:
+      self.id = x
+      self.ref = None
+    elif type(x) is VarDecl:
+      self.id = x.id
+      self.ref = x
 
   def __str__(self):
-    return f"({self.lhs} + {self.rhs})"
+    return self.id
 
-class SubExpr(Expr):
-  # Represents expressions of the form `e1 + e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+class VarDecl:
+  def __init__(self, id, t):
+    self.id = id
+    self.type = t
 
   def __str__(self):
-    return f"({self.lhs} + {self.rhs})"
+    return self.id
 
-class MulExpr(Expr):
-  # Represents expressions of the form `e1 - e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
-
-  def __str__(self):
-    return f"({self.lhs} - {self.rhs})"
-
-class DivExpr(Expr):
-  # Represents expressions of the form `e1 / e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
-
-  def __str__(self):
-    return f"({self.lhs} / {self.rhs})"
-
-class RemExpr(Expr):
-  # Represents expressions of the form `e1 % e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
-
-  def __str__(self):
-    return f"({self.lhs} % {self.rhs})"
-
-class NegExpr(Expr):
-  # Represents expressions of the form `-e1`.
-  def __init__(self, e1):
-    Expr.__init__(self)
+class AbsExpr(Expr):
+  def __init__(self, var, e1):
+    self.var = decl(var)
     self.expr = expr(e1)
 
   def __str__(self):
-    return f"(-{self.expr})"
+    return f"\\{self.var}.{self.expr}"
 
-## Relational expressions
-
-class EqExpr(Expr):
-  # Represents expressions of the form `e1 == e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+class AppExpr(Expr):
+  def __init__(self, e1, e2):
+    self.lhs = expr(e1)
+    self.rhs = expr(e2)
 
   def __str__(self):
-    return f"({self.lhs} == {self.rhs})"
+    return f"({self.lhs} {self.rhs})"
 
-class NeExpr(Expr):
-  # Represents expressions of the form `e1 != e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+class LambdaExpr(Expr):
+  def __init__(self, vars, e1):
+    self.vars = list(map(decl, vars))
+    self.expr = expr(e1)
 
   def __str__(self):
-    return f"({self.lhs} != {self.rhs})"
+    parms = ",".join(str(v) for v in self.vars)
+    return f"\\({parms}).{self.expr}"
 
-class LtExpr(Expr):
-  # Represents expressions of the form `e1 < e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+class CallExpr(Expr):
 
-  def __str__(self):
-    return f"({self.lhs} < {self.rhs})"
-
-class GtExpr(Expr):
-  # Represents expressions of the form `e1 > e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
+  def __init__(self, fn, args):
+    self.fn = expr(fn)
+    self.args = list(map(expr, args))
 
   def __str__(self):
-    return f"({self.lhs} > {self.rhs})"
+    args = ",".join(str(a) for a in self.args)
+    return f"{self.fn} ({args})"
 
-class LeExpr(Expr):
-  # Represents expressions of the form `e1 <= e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
-
+class PlaceholderExpr(Expr):
   def __str__(self):
-    return f"({self.lhs} <= {self.rhs})"
-
-class GeExpr(Expr):
-  # Represents expressions of the form `e1 >= e2`.
-  def __init__(self, lhs, rhs):
-    Expr.__init__(self)
-    self.lhs = expr(lhs)
-    self.rhs = expr(rhs)
-
-  def __str__(self):
-    return f"({self.lhs} >= {self.rhs})"
-
+    return "_"
 
 def expr(x):
-  # Turn a Python object into an expression. This is solely
-  # used to make simplify the writing expressions.
+
   if type(x) is bool:
     return BoolExpr(x)
-  if type(x) is int:
-    return IntExpr(x)
   if type(x) is str:
     return IdExpr(x)
   return x
 
-  #Reduce
-  def is_value(e):
-  # Returns true if the expression is designated as a value (i.e., 
-  # that the expression is irreducible).
-  return type(e) in (BoolExpr, IntExpr)
+def decl(x):
+  if type(x) is str:
+    return VarDecl(x)
+  return x
+
+#Lookup
+
+def lookup(id, stk):
+
+  for scope in reversed(stk):
+    if id in scope:
+      return scope[id]
+  return None
+
+def resolve(e, stk = []):
+
+  if type(e) is BoolExpr:
+    return e
+
+  if type(e) is AndExpr:
+    resolve(e.lhs, stk)
+    resolve(e.rhs, stk)
+    return e 
+
+  if type(e) is OrExpr:
+    resolve(e.lhs, stk)
+    resolve(e.rhs, stk)
+    return e 
+
+  if type(e) is NotExpr:
+    resolve(e.expr, stk)
+    return e
+
+  if type(e) is IfExpr:
+    resolve(e.cond, stk)
+    resolve(e.true, stk)
+    resolve(e.false, stk)
+    return e
+
+  if type(e) is IdExpr:
+    decl = lookup(e.id, stk)
+    if not decl:
+      raise Exception("name lookup error")
+
+    e.ref = decl
+    return e
+
+  if type(e) is AbsExpr:
+    resolve(e.expr, stk + [{e.var.id : e.var}])
+    return e
+
+  if type(e) is AppExpr:
+    resolve(e.lhs, stk)
+    resolve(e.rhs, stk)
+    return e
+
+  if type(e) is LambdaExpr:
+    resolve(e.expr, stk + [{var.id : var for var in e.vars}])
+    return e
+
+  if type(e) is CallExpr:
+    resolve(e.fn, stk)
+    for a in e.args:
+      resolve(e.fn, stk)
+    return e
+
+  assert False
+
+#Substitute
+
+def subst(e, s):
+  if type(e) is BoolExpr:
+    return e
+
+  if type(e) is AndExpr:
+    e1 = subst(e.lhs, s)
+    e2 = subst(e.rhs, s)
+    return AndExpr(e1, e2)
+
+  if type(e) is OrExpr:
+    e1 = subst(e.lhs, s)
+    e2 = subst(e.rhs, s)
+    return OrExpr(e1, e2)
+
+  if type(e) is NotExpr:
+    e1 = subst(e.expr, s)
+    return NotExpr(e1)
+
+  if type(e) is IfExpr:
+    e1 = subst(e.cond, s)
+    e2 = subst(e.true, s)
+    e3 = subst(e.false, s)
+    return IfExpr(e1, e2, e3)
+
+  if type(e) is IdExpr:
+    if e.ref in s:
+      return s[e.ref]
+    else:
+      return e
+
+  if type(e) is AbsExpr:
+    e1 = subst(e.expr, s)
+    return AbsExpr(e.var, e1)
+
+  if type(e) is AppExpr:
+    e1 = subst(e.lhs, s)
+    e2 = subst(e.rhs, s)
+    return AppExpr(e1, e2)
+
+  if type(e) is LambdaExpr:
+    e1 = subst(e.expr, s)
+    return LambdaExpr(e.vars, e1)
+
+  if type(e) is CallExpr:
+    e0 = subst(e.fn, s)
+    args = list(map(lambda x: subst(x, s), e.args))
+    return CallExpr(e0, args)
+
+  assert False
+
+#Reduce
+
+def is_value(e):
+  return type(e) in (BoolExpr, AbsExpr, LambdaExpr)
 
 def is_reducible(e):
-  # Returns true if the expression is reducible.
   return not is_value(e)
 
-def step_unary(e, Node, op):
-  # Compute the next step of a unary expression.
-  #
-  #     e1 ~> e1'
-  # ----------------- Not-1
-  # op e1 ~> op e1'
-  #
-  # ----------------- Not-1
-  # op v1 ~> [op `v1`]
-  if is_reducible(e.expr):
-    return Node(step(e.expr))
-
-  return expr(op(e.expr.value))
-
-def step_binary(e, Node, op):
-  # Compute the next step of a binary expression.
-  #
-  #   ---------------------------
-  #   v1 op v2 ~> [`v1` op `v2`]
-  #
-  #          e1 ~> e1'
-  #   -----------------------
-  #   e1 op e2 ~> e1' op e2
-  #
-  #          e2 ~> e2'
-  #   -----------------------
-  #   v1 op e2 ~> v1 op e2'
-  
-  # LHS first
-  if is_reducible(e.lhs):
-    return Node(step(e.lhs), e.rhs)
-
-  # RHS next
-  if is_reducible(e.rhs):
-    return Node(e.lhs, step(e.rhs))
-
-  # Combine the results.
-  return expr(op(e.lhs.value, e.rhs.value))
-
 def step_and(e):
-  return step_binary(e, AndExpr, lambda x, y: x and y)
+  
+  if is_reducible(e.lhs):
+    return AndExpr(step(e.lhs), e.rhs)
+
+  if is_reducible(e.rhs):
+    return AndExpr(e.lhs, step(e.rhs))
+
+  return BoolExpr(e.lhs.val and e.rhs.val)
 
 def step_or(e):
-  return step_binary(e, OrExpr, lambda x, y: x or y)
+  
+  if is_reducible(e.lhs):
+    return OrExpr(step(e.lhs), e.rhs)
+
+  if is_reducible(e.rhs):
+    return OrExpr(e.lhs, step(e.rhs))
+
+  return BoolExpr(e.lhs.val or e.rhs.val)
 
 def step_not(e):
-  return step_unary(e, NotExpr, lambda x: not x)
+
+  if is_reducible(e.expr):
+    return NotExpr(step(e.expr))
+
+  return BoolExpr(not e.expr.val)
 
 def step_if(e):
-  # Compute the next step of a not expression.
-  #
-  #                     e1 ~> e1'
-  # ---------------------------------------------- Cond-1
-  # if e1 then e2 else e3 ~> if e1' then e2 else e3
-  #
-  # ------------------------------ Cond-true
-  # if true then e2 else e3 ~> e2
-  #
-  # ------------------------------ Cond-true
-  # if false then e2 else e3 ~> e3
-  #
-  # Note that this selects either e2 or e3, but does not "advance"
-  # the selected expression.
 
   if is_reducible(e.cond):
     return NotExpr(step(e.cond), e.true, e.false)
@@ -315,38 +308,44 @@ def step_if(e):
   else:
     return e.false
 
-def step_add(e):
-  return step_binary(e, AddExpr, lambda x, y: x + y)
+def step_app(e):
 
-def step_sub(e):
-  return step_binary(e, SubExpr, lambda x, y: x - y)
+  
+  if is_reducible(e.lhs): 
+    return AppExpr(step(e.lhs), e.rhs)
 
-def step_mul(e):
-  return step_binary(e, MulExpr, lambda x, y: x * y)
+  if type(e.lhs) is not AbsExpr:
+    raise Exception("application of non-lambda")
 
-def step_div(e):
-  return step_binary(e, DivExpr, lambda x, y: x / y)
+  if is_reducible(e.rhs): 
+    return AppExpr(e.lhs, step(e.rhs))
 
-def step_rem(e):
-  return step_binary(e, RemExpr, lambda x, y: x % y)
+  s = {
+    e.lhs.var: e.rhs
+  }
+  return subst(e.lhs.expr, s);
 
-def step_eq(e):
-  return step_binary(e, EqExpr, lambda x, y: x == y)
+def step_call(e):
 
-def step_ne(e):
-  return step_binary(e, NeExpr, lambda x, y: x != y)
 
-def step_lt(e):
-  return step_binary(e, LtExpr, lambda x, y: x < y)
+  if is_reducible(e.fn):
+    return CallExpr(step(e.fn), e.args)
 
-def step_gt(e):
-  return step_binary(e, GtExpr, lambda x, y: x > y)
+  if len(e.args) < len(e.fn.vars):
+    raise Exception("too few arguments")
+  if len(e.args) > len(e.fn.vars):
+    raise Exception("too many arguments")
 
-def step_le(e):
-  return step_binary(e, LeExpr, lambda x, y: x <= y)
+  for i in range(len(e.args)):
+    if is_reducible(e.args[i]):
+      return CallExpr(e.fn, e.args[:i] + [step(e.args[i])] + e.args[i+1:])
 
-def step_ge(e):
-  return step_binary(e, GeExpr, lambda x, y: x >= y)
+  s = {}
+  for i in range(len(e.args)):
+    s[e.fn.vars[i]] = e.args[i]
+
+  return subst(e.fn.expr, s);
+
 
 def step(e):
   assert isinstance(e, Expr)
@@ -364,41 +363,11 @@ def step(e):
   if type(e) is IfExpr:
     return step_if(e)
 
-  if type(e) is AddExpr:
-    return step_add(e)
+  if type(e) is AppExpr:
+    return step_app(e)
 
-  if type(e) is SubExpr:
-    return step_sub(e)
-
-  if type(e) is MulExpr:
-    return step_mul(e)
-
-  if type(e) is DivExpr:
-    return step_div(e)
-
-  if type(e) is RemExpr:
-    return step_rem(e)
-
-  if type(e) is NegExpr:
-    return step_neg(e)
-
-  if type(e) is EqExpr:
-    return step_eq(e)
-
-  if type(e) is NeExpr:
-    return step_ne(e)
-
-  if type(e) is LtExpr:
-    return step_lt(e)
-
-  if type(e) is GtExpr:
-    return step_gt(e)
-
-  if type(e) is LeExpr:
-    return step_le(e)
-
-  if type(e) is GeExpr:
-    return step_ge(e)
+  if type(e) is CallExpr:
+    return step_call(e)
 
   assert False
 
@@ -408,279 +377,100 @@ def reduce(e):
     print(e)
   return e
 
-  #Check
-  boolType = BoolType()
+#Evaluate
 
-# The (only) integer type
-intType = IntType()
+class Closure:
 
-def is_bool(x):
-  # Returns true if x either is boolType (when
-  # x is a Type) or if x has boolType (when x
-  # is an expression). The latter case will
-  # recursively compute the the type of the
-  # expression as a "convenience".
-  if isinstance(x, Type):
-    return x == boolType
-  if isinstance(x, Expr):
-    return is_bool(check(x))
+  def __init__(self, abs, env):
+    self.abs = abs
+    self.env = clone(env)
 
-def is_int(x):
-  # Same as above, but for int.
-  if isinstance(x, Type):
-    return x == intType
-  if isinstance(x, Expr):
-    return is_int(check(x))
+def eval_bool(e, store):
 
-def is_same_type(t1, t2):
-  # Returns true if t1 and t2 are the same
-  # type (if both are types).
+  return e.val
 
-  # Quick reject. t1 and t2 are not objects
-  # of the same type.
-  if type(t1) is not type(t2):
-    return False
+def eval_and(e, store):
+ 
+  return evaluate(e.lhs, store) and evaluate(e.rhs, store)
 
-  if type(t1) is BoolType:
-    return True
+def eval_or(e, store):
   
-  if type(t1) is IntType:
-    return True
+  return evaluate(e.lhs, store) or evaluate(e.rhs, store)
 
-  assert False
+def eval_not(e, store):
+  return not evaluate(e.expr, store)
 
-def has_same_type(e1, e2):
-  # Returns true if e1 and e2 have the
-  # same type (recursively computing the
-  # types of both expressions.)
-  return is_same_type(check(e1), check(e2))
-
-def check_bool(e):
-  # -------- T-Bool
-  # b : Bool
-  return boolType
-
-def check_int(e):
-  # -------- T-Int
-  # n : Int
-  return intType
-
-def check_and(e):
-  # e1 : Bool   e2 : Bool
-  # --------------------- T-And
-  #   e1 and e2 : Bool
-  if is_bool(e1) and is_bool(e2):
-    return boolType
-  raise Exception("invalid operands to 'and'")
-
-def check_add(e):
-  # e1 : Int   e2 : Int
-  # ------------------- T-Add
-  #   e1 + e2 : Int
-  if is_int(e.lhs) and is_int(e.rhs):
-    return intType
-  raise Exception("invalid operands to '+'")
-
-def check_sub(e):
-  # e1 : Int   e2 : Int
-  # ------------------- T-Sub
-  #   e1 - e2 : Int
-  if is_int(e.lhs) and is_int(e.rhs):
-    return intType
-  raise Exception("invalid operands to '-'")
-
-def check_eq(e):
-  # e1 : T1   e2 : T2
-  # ----------------- T-Eq
-  #   e1 == e2 : Bool
-  if has_same_type(e.lhs, e.rhs):
-    return boolType
-  raise Exception("invalid operands to '=='")
-
-def do_check(e):
-  # Compute the type of e.
-  assert isinstance(e, Expr)
-
-  if type(e) is BoolExpr:
-    return check_bool(e)
-
-  if type(e) is AndExpr:
-    return check_and(e)
-
-  if type(e) is OrExpr:
-    return check_or(e)
-
-  if type(e) is NotExpr:
-    return check_not(e)
-
-  if type(e) is IfExpr:
-    return check_if(e)
-
-  if type(e) is IntExpr:
-    return check_int(e)
-
-  if type(e) is AddExpr:
-    return check_add(e)
-
-  if type(e) is SubExpr:
-    return check_sub(e)
-
-  if type(e) is MulExpr:
-    return check_mul(e)
-
-  if type(e) is DivExpr:
-    return check_div(e)
-
-  if type(e) is RemExpr:
-    return check_rem(e)
-
-  if type(e) is NegExpr:
-    return check_neg(e)
-
-  if type(e) is EqExpr:
-    return check_eq(e)
-
-  if type(e) is NeExpr:
-    return check_ne(e)
-
-  if type(e) is LtExpr:
-    return check_lt(e)
-
-  if type(e) is GtExpr:
-    return check_gt(e)
-
-  if type(e) is LeExpr:
-    return check_le(e)
-
-  if type(e) is GeExpr:
-    return check_ge(e)
-
-  assert False
-
-
-def check(e):
-  # Accepts an expression and returns its type.
-
-  # If we've computed the type already, return it.
-  if not e.type:
-    e.type = do_check(e)
-
-  return e.type
-
-  #Evaluate
-def eval_bool(e):
-  return e.value
-
-def eval_and(e):
-  return evaluate(e.lhs) and evaluate(e.rhs)
-
-def eval_or(e):
-  return evaluate(e.lhs) or evaluate(e.rhs)
-
-def eval_not(e):
-  return not evaluate(e.expr)
-
-def eval_if(e):
+def eval_cond(e, store):
   if evaluate(e.cond):
     return evaluate(e.true);
   else:
     return evaluate(e.false);
 
-def eval_int(e):
-  return e.value
+def eval_id(e, store):
+ 
+  return store[e.ref]
 
-def eval_add(e):
-  return evaluate(e.lhs) + evaluate(e.rhs)
+def eval_abs(e, store):
 
-def eval_sub(e):
-  return evaluate(e.lhs) - evaluate(e.rhs)
+  return Closure(e, store)
 
-def eval_mul(e):
-  return evaluate(e.lhs) * evaluate(e.rhs)
+def eval_app(e, store):
 
-def eval_div(e):
-  return evaluate(e.lhs) / evaluate(e.rhs)
+  c = evaluate(e.lhs, store)
 
-def eval_rem(e):
-  return evaluate(e.lhs) % evaluate(e.rhs)
+  if type(c) is not Closure:
+    raise Exception("cannot apply a non-closure to an argument")
 
-def eval_neg(e):
-  return -evaluate(e.expr)
+  v = evaluate(e.rhs, store)
 
-def eval_eq(e):
-  return evaluate(e.lhs) == evaluate(e.rhs)
+  return evaluate(c.abs.expr, c.env + {c.abs.var: v})
 
-def eval_ne(e):
-  return evaluate(e.lhs) != evaluate(e.rhs)
+def eval_lambda(e, store):
+  
+  return Closure(e, store)
 
-def eval_lt(e):
-  return evaluate(e.lhs) < evaluate(e.rhs)
+def eval_call(e, store):
+  c = evaluate(e.fn, store)
+  
+  if type(c) is not Closure:
+    raise Exception("cannot apply a non-closure to an argument")
 
-def eval_gt(e):
-  return evaluate(e.lhs) > evaluate(e.rhs)
+  args = []
+  for a in e.args:
+    args += [evaluate(a, store)]
 
-def eval_le(e):
-  return evaluate(e.lhs) <= evaluate(e.rhs)
+  env = clone(c.env)
+  for i in range(len(args)):
+    env[c.abs.vars[i]] = args[i]
 
-def eval_ge(e):
-  return evaluate(e.lhs) >= evaluate(e.rhs)
+  return evaluate(c.abs.expr, env)
 
-def evaluate(e):
-  assert isinstance(e, Expr)
+def evaluate(e, store = {}):
+
 
   if type(e) is BoolExpr:
-    return eval_bool(e)
+    return eval_bool(e, store)
 
   if type(e) is AndExpr:
-    return eval_and(e)
+    return eval_and(e, store)
 
   if type(e) is OrExpr:
-    return eval_or(e)
+    return eval_or(e, store)
 
   if type(e) is NotExpr:
-    return eval_not(e)
+    return eval_not(e, store)
 
-  if type(e) is IfExpr:
-    return eval_if(e)
+  if type(e) is IdExpr:
+    return eval_id(e, store)
 
-  if type(e) is IntExpr:
-    return eval_int(e)
+  if type(e) is AbsExpr:
+    return eval_abs(e, store)
 
-  if type(e) is AddExpr:
-    return eval_add(e)
+  if type(e) is AppExpr:
+    return eval_app(e, store)
 
-  if type(e) is SubExpr:
-    return eval_sub(e)
+  if type(e) is LambdaExpr:
+    return eval_lambda(e, store)
 
-  if type(e) is MulExpr:
-    return eval_mul(e)
-
-  if type(e) is DivExpr:
-    return eval_div(e)
-
-  if type(e) is RemExpr:
-    return eval_rem(e)
-
-  if type(e) is NegExpr:
-    return eval_neg(e)
-
-  if type(e) is EqExpr:
-    return eval_eq(e)
-
-  if type(e) is NeExpr:
-    return eval_ne(e)
-
-  if type(e) is LtExpr:
-    return eval_lt(e)
-
-  if type(e) is GtExpr:
-    return eval_gt(e)
-
-  if type(e) is LeExpr:
-    return eval_le(e)
-
-  if type(e) is GeExpr:
-    return eval_ge(e)
-
-  assert False
-
+  if type(e) is CallExpr:
+    return eval_call(e, store)
